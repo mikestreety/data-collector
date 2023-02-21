@@ -1,7 +1,6 @@
-import {Args, Command, Flags} from '@oclif/core'
+import {Args, Command, Flags} from '@oclif/core';
 
-import {JsonFileRead, JsonFileWrite} from '../utils/Json';
-import {BuildGETURL} from '../utils/URL';
+import * as u from '../utils';
 
 export default class Webmentions extends Command {
 
@@ -60,7 +59,7 @@ export default class Webmentions extends Command {
 		const {args, flags} = await this.parse(Webmentions);
 
 		// If the file exists, load it
-		let cache = JsonFileRead(args.file, {
+		let cache = u.JsonFileRead(args.file, {
 			lastFetched: false,
 			children: []
 		});
@@ -77,10 +76,10 @@ export default class Webmentions extends Command {
 		if (feed) {
 			const webmentions = {
 				lastFetched: new Date().toISOString(),
-				children: this.mergeWebmentions(cache.children, feed)
+				children: u.MergeItemsByKey(cache.children, feed, 'wm-id')
 			}
 
-			JsonFileWrite(args.file, webmentions);
+			u.JsonFileWrite(args.file, webmentions);
 		}
 	}
 
@@ -89,7 +88,7 @@ export default class Webmentions extends Command {
 
 	async fetchWebmentions(options: any) {
 
-		let URL = BuildGETURL(
+		let URL = u.BuildGETURL(
 			'https://webmention.io/api/mentions.jf2',
 			{
 				'domain': options.domain,
@@ -127,23 +126,5 @@ export default class Webmentions extends Command {
 		}
 
 		return [];
-	}
-
-	// Merge fresh webmentions with cached entries, unique per id
-	mergeWebmentions(a: any, b: any) {
-		a = a.concat(b);
-
-		return this.uniqBy(a, 'wm-id')
-	}
-
-	uniqBy(arr: any, iteratee: any) {
-		if (typeof iteratee === 'string') {
-			const prop = iteratee
-			iteratee = (item: any)=> item[prop]
-		}
-
-		return arr.filter(
-			(x: any, i: any, self: any) => i === self.findIndex((y: any)  => iteratee(x) === iteratee(y))
-		)
 	}
 }
