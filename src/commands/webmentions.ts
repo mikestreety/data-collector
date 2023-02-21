@@ -1,6 +1,7 @@
 import {Args, Command, Flags} from '@oclif/core'
 
 import {JsonFileRead, JsonFileWrite} from '../utils/Json';
+import {BuildGETURL} from '../utils/URL';
 
 export default class Webmentions extends Command {
 
@@ -70,7 +71,7 @@ export default class Webmentions extends Command {
 		}
 
 		// Get all the webmentions required
-		const feed = await this.fetchWebmentions(flags, '');
+		const feed = await this.fetchWebmentions(flags);
 
 		// If we have them save them
 		if (feed) {
@@ -86,30 +87,26 @@ export default class Webmentions extends Command {
 	// save combined webmentions in cache file
 
 
-	async fetchWebmentions(options: any, since: string) {
-		const API_ORIGIN = 'https://webmention.io/api/mentions.jf2';
-		let url = `${API_ORIGIN}?domain=${options.domain}&token=${options.token}&per-page=${options.perPage}`
+	async fetchWebmentions(options: any) {
 
+		let URL = BuildGETURL(
+			'https://webmention.io/api/mentions.jf2',
+			{
+				'domain': options.domain,
+				'token': options.token,
+				'per-page': options.perPage,
+				'sort-by': options.sortBy,
+				'sort-dir': options.sortDir,
+				'wm-property[]': options.property,
+				'since_id': {
+					value: options.sinceId,
+					replaces: 'since'
+				},
+				'since': options.since,
+			}
+		);
 
-		if (options.sortBy) {
-			url += `&sort-by=${options.sortBy}`
-		}
-
-		if (options.sortDir) {
-			url += `&sort-dir=${options.sortBy}`
-		}
-
-		if (options.property?.length) {
-			url += `&wm-property[]=${options.property.join('&wm-property[]=')}`
-		}
-
-		if (options.sinceId) {
-			url += `&since_id=${since}`
-		} else if (options.since) {
-			url += `&since=${since}`
-		}
-
-		return await this.getWebmentionPage(url, 0, options.perPage);
+		return await this.getWebmentionPage(URL, 0, options.perPage);
 	}
 
 	async getWebmentionPage(url: string, page: number, perPage: string) {
