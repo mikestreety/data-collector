@@ -1,6 +1,6 @@
 import {Args, Command, Flags} from '@oclif/core'
 
-import * as fs from 'fs';
+import {JsonFileRead, JsonFileWrite} from '../utils/Json';
 
 export default class Webmentions extends Command {
 
@@ -59,7 +59,10 @@ export default class Webmentions extends Command {
 		const {args, flags} = await this.parse(Webmentions);
 
 		// If the file exists, load it
-		let cache = this.loadExistingData(args.file)
+		let cache = JsonFileRead(args.file, {
+			lastFetched: false,
+			children: []
+		});
 
 		// If there isn't a "since" in the CLI
 		if (!flags.since) {
@@ -76,40 +79,12 @@ export default class Webmentions extends Command {
 				children: this.mergeWebmentions(cache.children, feed)
 			}
 
-			this.writeData(args.file, webmentions);
-		}
-	}
-
-	/**
-	 * If there is already a file, load the existing data
-	 *
-	 * @returns Object
-	 */
-	loadExistingData(path: string) {
-		if (fs.existsSync(path)) {
-			const cacheFile = fs.readFileSync(path, 'utf-8')
-			return JSON.parse(cacheFile)
-		}
-
-		return {
-			lastFetched: false,
-			children: []
+			JsonFileWrite(args.file, webmentions);
 		}
 	}
 
 	// save combined webmentions in cache file
-	writeData(path: string, data: any) {
-		const fileContent = JSON.stringify(data, null, 2)
 
-		// write data to cache json file
-		fs.writeFile(path, fileContent, err => {
-			if (err) {
-				throw err
-			}
-
-			console.log(`${data.children.length} webmentions cached to ${path}`)
-		})
-	}
 
 	async fetchWebmentions(options: any, since: string) {
 		const API_ORIGIN = 'https://webmention.io/api/mentions.jf2';
@@ -128,7 +103,9 @@ export default class Webmentions extends Command {
 			url += `&wm-property[]=${options.property.join('&wm-property[]=')}`
 		}
 
-		if (options.since) {
+		if (options.sinceId) {
+			url += `&since_id=${since}`
+		} else if (options.since) {
 			url += `&since=${since}`
 		}
 
