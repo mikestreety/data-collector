@@ -1,4 +1,4 @@
-import {Args, Command, Flags} from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 
 import * as u from '../utils';
 
@@ -11,6 +11,10 @@ export default class Webmentions extends Command {
 	]
 
 	static flags = {
+		verbose: Flags.boolean({
+			char: 'v',
+			description: 'Increase verbosity of output'
+		}),
 		domain: Flags.string({
 			char: 'd',
 			required: true,
@@ -70,13 +74,15 @@ export default class Webmentions extends Command {
 		}
 
 		// Get all the webmentions required
+		ux.action.start('Fetching webmentions')
 		const feed = await this.fetchWebmentions(flags);
+		ux.action.stop(`Found ${feed.length}`);
 
 		// If we have them save them
 		if (feed) {
 			const webmentions = {
 				lastFetched: new Date().toISOString(),
-				children: u.MergeItemsByKey(cache.children, feed, 'wm-id')
+				children: u.MergeItemsByKey('wm-id', cache.children, feed)
 			}
 
 			u.JsonFileWrite(args.file, webmentions);
@@ -105,19 +111,24 @@ export default class Webmentions extends Command {
 			}
 		);
 
-		return await this.getWebmentionPage(URL, 0, options.perPage);
+		return await this.getWebmentionPage(options, URL, 0);
 	}
 
-	async getWebmentionPage(url: string, page: number, perPage: string) {
-		const response = await fetch(url + `&page=${page}`);
+	async getWebmentionPage(options: any, url: string, page: number) {
+		url = url + `&page=${page}`;
+
+		if(options.verbose) {
+			console.log(url);
+		}
+		const response = await fetch(url);
 		if (response.ok) {
 			const feed = await response.json();
 
 			let children = feed.children.length ? feed.children : [];
 
-			// Get the next page if the number is equal to "perPage"
-			if (children.length === perPage) {
-				let data = await this.getWebmentionPage(url, ++page, perPage);
+			// Get the next page if the number is equal to "options.perPage"
+			if (children.length === options.perPage) {
+				let data = await this.getWebmentionPage(options, url, ++page);
 				// Add to the end of existing array
 				children = children.concat(data);
 			}
