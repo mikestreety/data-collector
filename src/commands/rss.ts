@@ -1,8 +1,6 @@
 import { Args, Command, Flags } from '@oclif/core';
 import * as inquirer from 'inquirer'
 
-import * as Parser from 'rss-parser';
-
 import * as u from '../utils';
 
 export default class Rss extends Command {
@@ -56,7 +54,7 @@ export default class Rss extends Command {
 		});
 
 		// Get all the webmentions required
-		const feed = await this.fetchFeed(flags);
+		const feed = await u.fetchRssFeed(flags);
 
 		// If we have them save them
 		if (feed) {
@@ -67,12 +65,6 @@ export default class Rss extends Command {
 
 			u.JsonFileWrite(args.file, rssItems);
 		}
-	}
-
-	async fetchFeed(options: any) {
-		const parser = new Parser();
-		const feed = await parser.parseURL(options.feed);
-		return feed.items;
 	}
 
 	async selectFeed(feeds: any, options: any) {
