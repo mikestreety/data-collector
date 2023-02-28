@@ -47,11 +47,7 @@ export default class Rss extends Command {
 				// no feeds
 				return;
 			}
-
-
 		}
-
-		console.log(flags)
 
 		// If the file exists, load it
 		let cache = u.JsonFileRead(args.file, {
