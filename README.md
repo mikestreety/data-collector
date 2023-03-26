@@ -10,6 +10,7 @@ Built with https://oclif.io/
 		- [RSS](#rss)
 		- [Letterboxd](#letterboxd)
 	- [Roadmap](#roadmap)
+	- [Releasing](#releasing)
 
 ## Installation
 
@@ -93,3 +94,10 @@ datacollector letterboxd letterboxd.json -u mikestreety
 - Allow `.env` files
 - Create oAuth workflow
 - Add Strava
+
+## Releasing
+
+Once ready to release, run the following
+
+- `npm version (major|minor|patch)`
+- `npm publish`
