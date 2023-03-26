@@ -3,11 +3,49 @@
 Built with https://oclif.io/
 
 - [Data Collector](#data-collector)
+	- [Installation](#installation)
+		- [Global](#global)
 	- [Services](#services)
 		- [Webmentions](#webmentions)
 		- [RSS](#rss)
 		- [Letterboxd](#letterboxd)
 	- [Roadmap](#roadmap)
+
+## Installation
+
+```
+npm i @mikestreety/data-collector
+```
+
+You can then access it with the following:
+
+```
+./node_modules/.bin/dc
+```
+
+In your `package.json`, you can add specific commands or a shortcut to the main command
+
+```json
+"scripts": {
+  "dc": "dc"
+},
+```
+
+With this set, you can pass in your commands to a slightly shorter (and more memorable) command:
+
+```bash
+npm run dc -- letterboxd letterboxd.json -u mikestreety
+```
+
+### Global
+
+You can install it globally if you wish
+
+```
+npm i -g @mikestreety/data-collector
+```
+
+Which would allow you to run `dc` in your terminal
 
 ## Services
 
@@ -31,7 +69,7 @@ Any RSS feed provided (or searches for RSS) of a given domain
 - `-d`, `--domain` - the domain to search for the RSS feeds
 
 ```
-./bin/dev letterboxd rss.json -f [https://www.mikestreety.co.uk/rss-notes.xml
+./bin/dev letterboxd rss.json -f https://www.mikestreety.co.uk/rss-notes.xml
 ```
 
 or
