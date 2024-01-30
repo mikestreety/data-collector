@@ -70,13 +70,13 @@ Any RSS feed provided (or searches for RSS) of a given domain
 - `-d`, `--domain` - the domain to search for the RSS feeds
 
 ```
-datacollector letterboxd rss.json -f https://www.mikestreety.co.uk/rss-notes.xml
+datacollector rss rss.json -f https://www.mikestreety.co.uk/rss-notes.xml
 ```
 
 or
 
 ```
-datacollector letterboxd rss.json -d www.mikestreety.co.uk
+datacollector rss rss.json -d www.mikestreety.co.uk
 ```
 
 ### Letterboxd
